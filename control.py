@@ -61,10 +61,13 @@ def print_games(server_url):
 
 
 def report(client):
+    print('TASKS:')
     print_aws_tasks(client)
-    print("============================================")
+    print('============================================')
+    print('LEADERBOARD:')
     print_leaderboard(server_url='http://54.252.220.59/')
-    print("============================================")
+    print('============================================')
+    print('MATCH SUMMARY:')
     print_games(server_url='http://54.252.220.59/')
 
 
