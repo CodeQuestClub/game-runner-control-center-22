@@ -1,0 +1,24 @@
+{
+    "cluster":"codequest-worker-cluster",
+    "capacityProviderStrategy":[
+        {
+            "capacityProvider": "FARGATE",
+            "weight": 1,
+            "base": 0
+        }
+    ],
+    "taskDefinition":"codequest-worker:2",
+    "networkConfiguration": {
+        "awsvpcConfiguration": {
+            "subnets": [
+                "subnet-79d2ef1e",
+                "subnet-80f15ed8",
+                "subnet-9ceec0d5"
+            ],
+            "securityGroups": [
+                "sg-d5fef0ad"
+            ],
+            "assignPublicIp": "ENABLED"
+        }
+    }
+}
