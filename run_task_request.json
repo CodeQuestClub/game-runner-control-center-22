@@ -20,5 +20,8 @@
             ],
             "assignPublicIp": "ENABLED"
         }
+    },
+    "overrides": {
+        "environment": []
     }
 }

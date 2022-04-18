@@ -4,10 +4,14 @@ import json
 import secrets
 import requests
 
+
 def create_instance(client, instance_count=1):
     with open('./run_task_request.json') as request_file:
         request = json.load(request_file)
-
+    request['overrides']['environment'].extend([
+        {'name': 'client_id', 'value': secrets.aws_access_key_id},
+        {'name': 'client_key', 'value': secrets.aws_secret_access_key}
+    ])
     response = client.run_task(**request, count=instance_count)
 
 
