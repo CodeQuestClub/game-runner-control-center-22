@@ -3,6 +3,7 @@ import boto3
 import json
 import secrets
 import requests
+from time import sleep
 
 
 def create_instance(client, instance_count=1):
@@ -17,6 +18,7 @@ def create_instance(client, instance_count=1):
     for worker_id in range(instance_count):
         request['overrides']['environment'][-1]['value'] = worker_id
         client.run_task(**request, count=1)
+        sleep(0.1)
 
 
 def print_aws_tasks(client):
