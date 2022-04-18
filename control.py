@@ -9,14 +9,18 @@ from time import sleep
 def create_instance(client, instance_count=1):
     with open('./run_task_request.json') as request_file:
         request = json.load(request_file)
-    request['overrides']['environment'].extend([
+    request['overrides']['containerOverrides'][0]['environment'].extend([
         {'name': 'client_id', 'value': secrets.aws_access_key_id},
         {'name': 'client_key', 'value': secrets.aws_secret_access_key},
         {'name': 'server_url', 'value': secrets.server_url},
         {'name': 'worker_id', 'value': None}
     ])
     for worker_id in range(instance_count):
-        request['overrides']['environment'][-1]['value'] = worker_id
+        list(filter(
+            lambda x: x['name'] == 'worker_id',
+            request['overrides']['containerOverrides'][0]['environment']
+        ))[0]['value'] = str(worker_id)
+
         client.run_task(**request, count=1)
         sleep(0.1)
 
@@ -50,12 +54,11 @@ def print_aws_tasks(client):
           'Stopeed tasks: {}'.format(total_tasks, running_tasks, pending_tasks, stopped_tasks))
 
 
-def print_leaderboard(server_url):
+def get_leaderboard(server_url):
     response = requests.get(server_url).json()
     leaderboard = sorted(response['teams'], key=lambda x: x['score'], reverse=True)
 
-    for i, team in enumerate(leaderboard):
-        print('Team #{}, name: {}, score: {}'.format(i+1, team['name'], team['score']))
+    return leaderboard
 
 
 def print_games(server_url):
@@ -70,15 +73,27 @@ def print_games(server_url):
                 print("Match: team 1: {}, team 2: {}, team 3: {}, team 4: {} --- Status: {} --- results: {}".format(group[0], group[1], group[2], group[3], match['status'], match['results']))
 
 
+def create_leaderboard_data():
+    leaderboard_data = get_leaderboard(server_url=secrets.server_url)
+    leaderboard = []
+    for rank, team in enumerate(leaderboard_data):
+        row = [rank+1, team['name'], team['score']]
+        leaderboard.append(row)
+
+    with open('./leaderboard/leaderboard.json', 'w') as leaderboard_json:
+        leaderboard_json.write(json.dumps(leaderboard))
+
+
 def report(client):
+    create_leaderboard_data()
+    print('============================================')
     print('TASKS:')
     print_aws_tasks(client)
     print('============================================')
-    print('LEADERBOARD:')
-    print_leaderboard(server_url=secrets.server_url)
-    print('============================================')
-    print('MATCH SUMMARY:')
-    print_games(server_url=secrets.server_url)
+    # print('LEADERBOARD:')
+    # print('============================================')
+    # print('MATCH SUMMARY:')
+    # print_games(server_url=secrets.server_url)
 
 
 if __name__ == '__main__':

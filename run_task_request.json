@@ -22,6 +22,11 @@
         }
     },
     "overrides": {
-        "environment": []
+        "containerOverrides": [
+            {
+                "name": "codequest-worker",
+                "environment": []
+            }
+        ]
     }
 }
