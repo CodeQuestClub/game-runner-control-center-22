@@ -15,7 +15,7 @@ def create_instance(client, instance_count=1):
     ])
     for worker_id in range(instance_count):
         request['overrides']['environment'][-1]['value'] = worker_id
-        client.run_task(**request, count=instance_count)
+        client.run_task(**request, count=1)
 
 
 def print_aws_tasks(client):
