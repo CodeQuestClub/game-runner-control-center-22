@@ -11,6 +11,7 @@ def create_instance(client, instance_count=1):
     request['overrides']['environment'].extend([
         {'name': 'client_id', 'value': secrets.aws_access_key_id},
         {'name': 'client_key', 'value': secrets.aws_secret_access_key},
+        {'name': 'server_url', 'value': secrets.server_url},
         {'name': 'worker_id', 'value': None}
     ])
     for worker_id in range(instance_count):
@@ -72,10 +73,10 @@ def report(client):
     print_aws_tasks(client)
     print('============================================')
     print('LEADERBOARD:')
-    print_leaderboard(server_url='http://54.252.220.59/')
+    print_leaderboard(server_url=secrets.server_url)
     print('============================================')
     print('MATCH SUMMARY:')
-    print_games(server_url='http://54.252.220.59/')
+    print_games(server_url=secrets.server_url)
 
 
 if __name__ == '__main__':
