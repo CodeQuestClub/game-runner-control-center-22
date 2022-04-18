@@ -5,5 +5,5 @@ Control center for the 2022 codequest competition
 ### Instructions
 for usage information:
 ```sh
-python ./control.py -h 
+python ./main.py -h 
 ```
