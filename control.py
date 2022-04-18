@@ -10,9 +10,12 @@ def create_instance(client, instance_count=1):
         request = json.load(request_file)
     request['overrides']['environment'].extend([
         {'name': 'client_id', 'value': secrets.aws_access_key_id},
-        {'name': 'client_key', 'value': secrets.aws_secret_access_key}
+        {'name': 'client_key', 'value': secrets.aws_secret_access_key},
+        {'name': 'worker_id', 'value': None}
     ])
-    response = client.run_task(**request, count=instance_count)
+    for worker_id in range(instance_count):
+        request['overrides']['environment'][-1]['value'] = worker_id
+        client.run_task(**request, count=instance_count)
 
 
 def print_aws_tasks(client):
