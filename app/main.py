@@ -2,7 +2,7 @@ import argparse
 import boto3
 import secrets
 from cmd import Cmd
-from actions import report, create_instance
+from actions import general_report, create_task_instance, download_replay, delete_all_replays
 
 
 class Prompt(Cmd):
@@ -17,19 +17,31 @@ class Prompt(Cmd):
         print('exit the application. Shorthand: x q Ctrl-D.')
 
     def do_report(self, inp):
-        report(client)
+        general_report()
 
     def help_report(self):
         print("show task reports and generate leaderboard")
 
     def do_CI(self, count):
         try:
-            create_instance(client, int(count))
+            create_task_instance(int(count))
         except:
             print("Bad request")
 
     def help_CI(self):
         print('create <Count> ECS worker instances on AWS')
+
+    def do_get_replay(self, object_name):
+        download_replay(object_name)
+
+    def help_get_replay(self):
+        print('download the replay file for team <team_name>')
+
+    def do_DAR(self, inp):
+        delete_all_replays()
+
+    def help_DAR(self):
+        print('delete all replays in the codequest_replay bucket')
 
     def default(self, inp):
         if inp == 'x' or inp == 'q':
@@ -48,17 +60,10 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--report', help='Show report of AWS instances', action='store_true')
     args = vars(parser.parse_args())
 
-    client = boto3.client(
-        'ecs',
-        region_name='ap-southeast-2',
-        aws_access_key_id=secrets.aws_access_key_id,
-        aws_secret_access_key=secrets.aws_secret_access_key,
-    )
-
     if args['create_instance'] is not None:
-        create_instance(client, args['create_instance'])
+        create_task_instance(args['create_instance'])
     if args['report']:
-        report(client)
+        general_report()
 
     # create interactive shell
     Prompt().cmdloop()

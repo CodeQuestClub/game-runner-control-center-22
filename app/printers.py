@@ -28,13 +28,6 @@ def print_aws_tasks(client):
                                 states_count['STOPPED']))
 
 
-def get_leaderboard(server_url):
-    response = requests.get(server_url).json()
-    leaderboard = sorted(response['teams'], key=lambda x: x['score'], reverse=True)
-
-    return leaderboard
-
-
 def print_matches(server_url):
     response = requests.get(server_url).json()
     matches = response['matches']
@@ -60,14 +53,3 @@ def print_match_stats(server_url):
             if group == sorted(match['teams']):
                 print("Match: team 1: {}, team 2: {}, team 3: {}, team 4: {} --- Status: {} --- results: {}".format(
                     group[0], group[1], group[2], group[3], match['status'], match['results']))
-
-
-def create_leaderboard_data():
-    leaderboard_data = get_leaderboard(server_url=secrets.server_url)
-    leaderboard = []
-    for rank, team in enumerate(leaderboard_data):
-        row = [rank + 1, team['name'], team['score']]
-        leaderboard.append(row)
-
-    with open(os.path.abspath(os.getcwd()) + '/app/leaderboard/leaderboard.json', 'w') as leaderboard_json:
-        leaderboard_json.write(json.dumps(leaderboard))
