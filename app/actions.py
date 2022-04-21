@@ -38,7 +38,14 @@ def create_task_instance(instance_count=1):
 
 def get_leaderboard(server_url):
     response = requests.get(server_url).json()
-    leaderboard = sorted(response['teams'], key=lambda x: x['score'], reverse=True)
+    teams = {}
+    for match in response['matches']:
+        for team in match['teams']:
+            if team not in teams:
+                teams[team] = {'name': team, 'score': 0}
+            teams[team]['score'] += match['results'][team]
+    
+    leaderboard = sorted(list(teams.values()), key=lambda x: x['score'], reverse=True)
 
     return leaderboard
 
@@ -54,10 +61,24 @@ def create_leaderboard_data():
         leaderboard_json.write(json.dumps(leaderboard))
 
 
+def create_match_team_mapping():
+    response = requests.get(secrets.server_url).json()
+    team_to_match = {}
+    for index, match in enumerate(response['matches']):
+        for team in match['teams']:
+            if team not in team_to_match.keys():
+                team_to_match[team] = []
+            team_to_match[team].append(index)
+    for team in team_to_match.keys():
+        with open(f'app/mappings/{team}.txt', 'w') as f:
+            f.write('\n'.join([f'https://codequest-replays.s3.ap-southeast-2.amazonaws.com/match_{str(x)}/replay.txt' for x in team_to_match[team]]))
+
+
 def general_report():
     client = create_aws_client(type='ecs')
 
     create_leaderboard_data()
+    create_match_team_mapping()
     print('============================================')
     print('TASKS:')
     print_aws_tasks(client)
@@ -83,3 +104,10 @@ def delete_all_replays():
 
     bucket = s3.Bucket('codequest-replays')
     bucket.objects.all().delete()
+
+
+def get_team_matches(team):
+    matches = requests.get(secrets.server_url).json()['matches']
+    for i, match in enumerate(matches):
+        if team in match['teams']:
+            print(i)

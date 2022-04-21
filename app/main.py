@@ -2,7 +2,7 @@ import argparse
 import boto3
 import secrets
 from cmd import Cmd
-from actions import general_report, create_task_instance, download_replay, delete_all_replays
+from actions import general_report, create_task_instance, download_replay, delete_all_replays, get_team_matches
 
 
 class Prompt(Cmd):
@@ -21,6 +21,12 @@ class Prompt(Cmd):
 
     def help_report(self):
         print("show task reports and generate leaderboard")
+
+    def do_get_team_matches(self, team):
+        get_team_matches(team)
+
+    def help_get_team_matches(self):
+        print("Get all match indices for the team in input")
 
     def do_CI(self, count):
         try:

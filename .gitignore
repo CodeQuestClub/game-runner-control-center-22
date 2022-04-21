@@ -3,3 +3,5 @@ __pycache__
 app/secrets.py
 .vscode
 app/replays/*
+.DS_Store
+app/mappings/
