@@ -32,7 +32,7 @@ def create_task_instance(instance_count=1):
             request['overrides']['containerOverrides'][0]['environment']
         ))[0]['value'] = str(worker_id)
 
-        client.run_task(**request, count=1)
+        print(client.run_task(**request, count=1))
         sleep(0.1)
 
 
@@ -43,7 +43,10 @@ def get_leaderboard(server_url):
         for team in match['teams']:
             if team not in teams:
                 teams[team] = {'name': team, 'score': 0}
-            teams[team]['score'] += match['results'][team]
+            try:
+                teams[team]['score'] += match['results'][team]
+            except KeyError:
+                pass
     
     leaderboard = sorted(list(teams.values()), key=lambda x: x['score'], reverse=True)
 
@@ -51,10 +54,12 @@ def get_leaderboard(server_url):
 
 
 def create_leaderboard_data():
+    with open('team_names.json', 'r') as f:
+        team_names = json.loads(f.read())
     leaderboard_data = get_leaderboard(server_url=secrets.server_url)
     leaderboard = []
     for rank, team in enumerate(leaderboard_data):
-        row = [rank + 1, team['name'], team['score']]
+        row = [rank + 1, team_names[team['name']], team['score']]
         leaderboard.append(row)
 
     with open(os.path.abspath(os.getcwd()) + '/app/leaderboard/leaderboard.json', 'w') as leaderboard_json:
@@ -70,7 +75,7 @@ def create_match_team_mapping():
                 team_to_match[team] = []
             team_to_match[team].append(index)
     for team in team_to_match.keys():
-        with open(f'app/mappings/{team}.txt', 'w') as f:
+        with open(f'mappings/{team}.txt', 'w') as f:
             f.write('\n'.join([f'https://codequest-replays.s3.ap-southeast-2.amazonaws.com/match_{str(x)}/replay.txt' for x in team_to_match[team]]))
 
 
@@ -93,7 +98,7 @@ def general_report():
 
 def download_replay(object_name):
     client = create_aws_client(type='s3')
-    client.download_file('codequest-replays', object_name + '/replay.txt', os.path.abspath(os.getcwd()) + '/app/replays/' + object_name + '_replay.txt')
+    client.download_file('codequest-replays', object_name + '/replay.txt', os.path.abspath(os.getcwd()) + '/replays/' + object_name + '_replay.txt')
 
 
 def delete_all_replays():

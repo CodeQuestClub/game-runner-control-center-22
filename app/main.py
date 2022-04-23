@@ -3,6 +3,10 @@ import boto3
 import secrets
 from cmd import Cmd
 from actions import general_report, create_task_instance, download_replay, delete_all_replays, get_team_matches
+import os
+import shutil
+import glob
+import requests
 
 
 class Prompt(Cmd):
@@ -28,6 +32,20 @@ class Prompt(Cmd):
     def help_get_team_matches(self):
         print("Get all match indices for the team in input")
 
+    def do_unzip_submissions(self, inp):
+        if os.path.isdir('bots'):
+            shutil.rmtree('bots')
+        os.makedirs('bots')
+        zips = glob.glob('submissions/*.zip')
+        for submission in zips:
+            file_name = submission[len('submissions/'):]
+            team_name = file_name.split('.')[0]
+            os.makedirs(f'bots/{team_name}')
+            shutil.unpack_archive(submission, f'bots/{team_name}')
+    
+    def help_unzip_submissions(self):
+        print("Unzip")
+
     def do_CI(self, count):
         try:
             create_task_instance(int(count))
@@ -37,11 +55,18 @@ class Prompt(Cmd):
     def help_CI(self):
         print('create <Count> ECS worker instances on AWS')
 
-    def do_get_replay(self, object_name):
-        download_replay(object_name)
+    def do_get_replays(self, inp=None):
+        if inp is not None:
+            download_replay(f'match_{inp}')
+            return
+        response = requests.get(secrets.server_url).json()
+        for i in range(len(response['matches'])):
+            if i % 250 == 0:
+                print(f'Downloaded {i} replays...')
+            download_replay(f'match_{i}')
 
-    def help_get_replay(self):
-        print('download the replay file for team <team_name>')
+    def help_get_replays(self):
+        print('download all replay files')
 
     def do_DAR(self, inp):
         delete_all_replays()

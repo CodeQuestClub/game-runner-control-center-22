@@ -5,3 +5,7 @@ app/secrets.py
 app/replays/*
 .DS_Store
 app/mappings/
+raw_submissions/*
+submissions/*
+bots/*
+replays/*
