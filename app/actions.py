@@ -76,7 +76,7 @@ def create_match_team_mapping():
             team_to_match[team].append(index)
     for team in team_to_match.keys():
         with open(f'mappings/{team}.txt', 'w') as f:
-            f.write('\n'.join([f'https://codequest-replays.s3.ap-southeast-2.amazonaws.com/match_{str(x)}/replay.txt' for x in team_to_match[team]]))
+            f.write('\n'.join([str(x) for x in team_to_match[team]]))
 
 
 def general_report():

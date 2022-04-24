@@ -7,6 +7,8 @@ import os
 import shutil
 import glob
 import requests
+import random
+import time
 
 
 class Prompt(Cmd):
@@ -56,14 +58,31 @@ class Prompt(Cmd):
         print('create <Count> ECS worker instances on AWS')
 
     def do_get_replays(self, inp=None):
-        if inp is not None:
+        if inp is not None and inp.strip() != '':
+            print("Hereeee")
+            print(inp)
             download_replay(f'match_{inp}')
             return
         response = requests.get(secrets.server_url).json()
-        for i in range(len(response['matches'])):
-            if i % 250 == 0:
-                print(f'Downloaded {i} replays...')
-            download_replay(f'match_{i}')
+        print("CHANGE WIFI")
+        time.sleep(20)
+        team_selected = dict()
+        for team in response['teams']:
+            team = team['name']
+            with open(f'mappings/{team}.txt', 'r') as f:
+                selected_replays = random.sample(list(f.readlines()), 10)
+                selected_replays = list(map(lambda x: x.strip(), selected_replays))
+            with open(f'mappings_selected/{team}.txt', 'w') as f:
+                f.write('\n'.join(selected_replays))
+            team_selected[team] = selected_replays
+        print("Here")
+        for selected_list in team_selected.values():
+            for game in selected_list:
+                try:
+                    game = game.strip()
+                    download_replay(f'match_{game}')
+                except Exception as e:
+                    print(f'Match {game} could not download')
 
     def help_get_replays(self):
         print('download all replay files')
